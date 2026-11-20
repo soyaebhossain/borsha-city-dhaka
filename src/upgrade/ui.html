@@ -1,0 +1,73 @@
+<div class="scr on" id="loading">
+ <div class="rainfx" style="position:absolute;inset:0;z-index:-1"></div>
+ <h1 class="title">বর্ষা সিটি<span>ঢাকা</span></h1>
+ <div class="lbar"><i id="ldBar"></i></div>
+ <p id="ldTxt">শুরু হচ্ছে…</p>
+ <small class="tipline" id="ldTip">💡 পানির নিচে ঘূর্ণি, বুদবুদ বা লাল পতাকা দেখলে বুঝবে — ওখানে খোলা ম্যানহোল।</small>
+ <div id="ldSlow"><p class="tipline">লোড হতে বেশি সময় লাগছে। ধীর ফোনে একটু অপেক্ষা করো, অথবা আবার চেষ্টা করো।</p><button class="btn ghost" onclick="location.reload()">↻ আবার লোড করো</button></div>
+</div>
+
+<div class="scr" id="home">
+ <nav class="nav" aria-label="প্রধান মেনু">
+  <div class="logo">বর্ষা সিটি<small>ঢাকা</small></div>
+  <button class="btn nb on" data-pg="dash"><i>🏠</i><span>হোম</span></button>
+  <button class="btn nb" data-pg="missions"><i>🎯</i><span>মিশন</span></button>
+  <button class="btn nb" data-pg="heroes"><i>👥</i><span>নায়ক ও পোশাক</span></button>
+  <button class="btn nb" data-pg="ach"><i>🏅</i><span>অর্জন</span></button>
+  <button class="btn nb" data-pg="records"><i>📊</i><span>রেকর্ড</span></button>
+  <button class="btn nb" data-act="settings"><i>⚙️</i><span>সেটিংস</span></button>
+  <div class="navfoot" id="navFoot"></div>
+ </nav>
+ <main id="pages">
+  <section class="pg on" id="pg-dash"></section>
+  <section class="pg" id="pg-missions"></section>
+  <section class="pg" id="pg-heroes"></section>
+  <section class="pg" id="pg-ach"></section>
+  <section class="pg" id="pg-records"></section>
+ </main>
+</div>
+
+<div class="scr dim" id="pauseScreen">
+ <div class="panel pausep cut">
+  <h2>বিরতি</h2>
+  <div class="psum" id="pSum"></div>
+  <div class="pmenu">
+   <button class="btn cta" id="resumeBtn">▶ চালিয়ে যাও</button>
+   <button class="btn ghost" id="pRestart">↺ মিশন আবার শুরু</button>
+   <button class="btn ghost" id="pMap">🗺️ ম্যাপ</button>
+   <button class="btn ghost" id="pSet">⚙️ সেটিংস</button>
+   <button class="btn ghost" id="pMenu">🏠 প্রধান মেনু</button>
+  </div>
+  <small class="saved" id="pSaved"></small>
+ </div>
+</div>
+
+<div class="scr dim" id="endScreen"><div class="panel endp cut" id="endP"></div></div>
+
+<div class="scr dim" id="setScr">
+ <div class="panel setp">
+  <div class="seth"><h3>⚙️ সেটিংস</h3><button class="btn xbtn" id="setClose" aria-label="বন্ধ করো">✕</button></div>
+  <div class="setw"><div id="setTabs" role="tablist"></div><div id="setBody"></div></div>
+ </div>
+</div>
+
+<div class="scr dim" id="tutScr">
+ <div class="panel tutp cut">
+  <div class="tut-ic" id="tutIc"></div><h3 id="tutT"></h3><p id="tutP"></p>
+  <div class="dots" id="tutDots"></div>
+  <div class="btnrow c"><button class="btn ghost" id="tutSkip">বাদ দাও</button><button class="btn ghost" id="tutPrev">‹ আগের</button><button class="btn cta" id="tutNext">পরের ›</button></div>
+ </div>
+</div>
+
+<div class="scr dim" id="dlg" role="dialog" aria-modal="true">
+ <div class="panel dlgp"><h3 id="dlgT"></h3><p id="dlgP"></p><input id="dlgIn" maxlength="16" autocomplete="off" style="display:none">
+  <div class="btnrow" style="justify-content:flex-end"><button class="btn ghost" id="dlgNo">না</button><button class="btn cta" id="dlgYes">হ্যাঁ</button></div></div>
+</div>
+
+<div class="scr" id="errBox">
+ <div class="panel errp"><h3>দুঃখিত, একটা সমস্যা হয়েছে 😓</h3><p>তোমার অগ্রগতি সেভ করা আছে। রিলোড করলে ঠিক জায়গা থেকে চালিয়ে যেতে পারবে।</p><code id="errMsg"></code>
+  <div class="btnrow c"><button class="btn ghost" id="errGo">তবুও খেলি</button><button class="btn cta" onclick="location.reload()">↻ রিলোড</button></div></div>
+</div>
+<input type="file" id="impFile" accept=".json,application/json" style="display:none">
+<div id="achStack" aria-live="polite"></div>
+<script>setTimeout(function(){ if(!window.__ready){ var s=document.getElementById('ldSlow'); if(s) s.style.display='block'; } },90000);</script>

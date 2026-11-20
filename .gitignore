@@ -1,0 +1,10 @@
+node_modules/
+__pycache__/
+shots/
+*.jks
+*.keystore
+*.idsig
+android/bin/
+android/obj/
+android/gen/
+android/assets/

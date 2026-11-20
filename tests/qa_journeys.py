@@ -1,0 +1,75 @@
+import asyncio, json, sys
+from playwright.async_api import async_playwright
+OUT='shots/'
+async def main():
+    async with async_playwright() as p:
+        b = await p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--autoplay-policy=no-user-gesture-required'])
+        ctx = await b.new_context(viewport={'width':1280,'height':720})
+        pg = await ctx.new_page()
+        errs=[]
+        pg.on('pageerror', lambda e: errs.append('PAGEERR '+str(e)))
+        pg.on('console', lambda m: errs.append(m.type+': '+m.text) if m.type=='error' else None)
+        await pg.goto('http://localhost:8765/index.html')
+        await asyncio.sleep(2); await pg.screenshot(path=OUT+'a0_loading.png')
+        await pg.wait_for_function('window.__ready===true', timeout=240000)
+        await pg.wait_for_selector('#home.on', timeout=20000); await asyncio.sleep(3)
+        await pg.screenshot(path=OUT+'a1_home.png')
+        ev=lambda js: pg.evaluate(js)
+        # missions page + heroes page
+        await pg.evaluate("document.querySelector('#home .nb[data-pg=missions]').click()"); await asyncio.sleep(1.5); await pg.screenshot(path=OUT+'a2_missions.png')
+        await pg.evaluate("document.querySelector('#home .nb[data-pg=heroes]').click()"); await asyncio.sleep(4); await pg.screenshot(path=OUT+'a3_heroes.png')
+        await pg.evaluate("document.querySelector('#home .nb[data-pg=ach]').click()"); await asyncio.sleep(1); await pg.screenshot(path=OUT+'a4_ach.png')
+        await pg.evaluate("document.querySelector('#home .nb[data-pg=dash]').click()"); await asyncio.sleep(1)
+        # start → tutorial → game
+        await pg.evaluate("document.querySelector('#contBtn').click()"); await asyncio.sleep(1)
+        print('tutorial on:', await ev("document.getElementById('tutScr').classList.contains('on')"))
+        await pg.screenshot(path=OUT+'a5_tut.png')
+        await pg.evaluate("document.querySelector('#tutSkip').click()"); await asyncio.sleep(5)
+        print('started:', await ev("JSON.stringify({s:__dbg.state.started,step:__dbg.state.step,live:__dbg.state.runLive,inmenu:document.body.classList.contains('inmenu')})"))
+        await pg.screenshot(path=OUT+'a6_game.png')
+        # pause
+        await pg.keyboard.press('Escape'); await asyncio.sleep(1.5)
+        print('paused:', await ev("JSON.stringify({p:__dbg.state.paused,scr:document.getElementById('pauseScreen').classList.contains('on'),saved:document.getElementById('pSaved').textContent})"))
+        await pg.screenshot(path=OUT+'a7_pause.png')
+        await pg.evaluate("document.querySelector('#pSet').click()"); await asyncio.sleep(1); await pg.screenshot(path=OUT+'a8_settings.png')
+        await pg.evaluate("document.querySelector('#setTabs [data-t=snd]').click()"); await asyncio.sleep(.5)
+        await pg.evaluate("(()=>{const i=document.getElementById('r_music'); i.value=20; i.dispatchEvent(new Event('input'));})()")
+        await pg.evaluate("document.querySelector('#setTabs [data-t=play]').click()"); await asyncio.sleep(.5)
+        await pg.evaluate("document.querySelector('#setBody .seg [data-v=hard]').click()"); await asyncio.sleep(.5)
+        await pg.screenshot(path=OUT+'a9_settings_play.png')
+        print('settings:', await ev("JSON.stringify({music:__dbg.settings.music,diff:__dbg.settings.diff,stored:JSON.parse(localStorage.getItem('borsha_settings')).diff})"))
+        await pg.keyboard.press('Escape'); await asyncio.sleep(.5)
+        await pg.evaluate("document.querySelector('#resumeBtn').click()"); await asyncio.sleep(1)
+        print('resumed:', await ev("__dbg.state.paused"))
+        # mission complete path: put player in CNG → step 0 completes
+        await ev("__dbg.tryEnterExit()"); await asyncio.sleep(6)
+        print('after enter:', await ev("JSON.stringify({step:__dbg.state.step,ach:Object.keys(__dbg.SAVE.ach),xp:__dbg.SAVE.profile.xp})"))
+        # complete mission 1 directly
+        await ev("__dbg.state.step=1; __dbg.state.stepT=10; __dbg.completeStep()"); await asyncio.sleep(4)
+        print('after m1:', await ev("JSON.stringify({step:__dbg.state.step,stars:__dbg.SAVE.stars,ach:Object.keys(__dbg.SAVE.ach),coins:__dbg.SAVE.profile.coins,xp:Math.round(__dbg.SAVE.profile.xp)})"))
+        await pg.screenshot(path=OUT+'b1_m1done.png')
+        # defeat: hard = 3 falls
+        await ev("__dbg.state.step=2; __dbg.state.missionFalls=0; for(let k=0;k<3;k++){ __dbg.state.failT=0; __dbg.fail('ধপাস! ম্যানহোলে পড়ে গেছো!','test'); } __dbg.state.failT=0.01;"); await asyncio.sleep(6)
+        print('defeat:', await ev("JSON.stringify({end:document.getElementById('endScreen').classList.contains('on'),lose:document.getElementById('endP').classList.contains('lose'),falls:__dbg.state.missionFalls})"))
+        await pg.screenshot(path=OUT+'b2_defeat.png')
+        await pg.evaluate("document.querySelector('#eRetry').click()"); await asyncio.sleep(4)
+        print('retry:', await ev("JSON.stringify({step:__dbg.state.step,paused:__dbg.state.paused,mf:__dbg.state.missionFalls})"))
+        # victory
+        await ev("__dbg.win()"); await asyncio.sleep(3)
+        print('win:', await ev("JSON.stringify({end:document.getElementById('endScreen').classList.contains('on'),rec:__dbg.SAVE.records.length,ach:Object.keys(__dbg.SAVE.ach)})"))
+        await pg.screenshot(path=OUT+'b3_victory.png')
+        await pg.evaluate("document.querySelector('#eFree').click()"); await asyncio.sleep(2)
+        print('free:', await ev("JSON.stringify({free:__dbg.state.freeRoam,paused:__dbg.state.paused})"))
+        # save → menu → reload → continue
+        await ev("__dbg.state.money=4321; __dbg.persist()")
+        await pg.keyboard.press('Escape'); await asyncio.sleep(1); await pg.evaluate("document.querySelector('#pMenu').click()"); await asyncio.sleep(2)
+        await pg.screenshot(path=OUT+'b4_menu_after.png')
+        await pg.reload(); await pg.wait_for_function('window.__ready===true', timeout=240000); await pg.wait_for_selector('#home.on'); await asyncio.sleep(2)
+        print('reloaded save run:', await ev("JSON.stringify({run:!!__dbg.SAVE.run,money:__dbg.SAVE.run&&__dbg.SAVE.run.heroes[0].money,free:__dbg.SAVE.run&&__dbg.SAVE.run.free,diff:__dbg.settings.diff,lvl:__dbg.SAVE.profile.xp|0})"))
+        await pg.evaluate("document.querySelector('#contBtn').click()"); await asyncio.sleep(4)
+        print('continued:', await ev("JSON.stringify({started:__dbg.state.started,money:__dbg.state.money,free:__dbg.state.freeRoam})"))
+        await pg.screenshot(path=OUT+'b5_continued.png')
+        print('perf:', await ev("JSON.stringify({fps:__dbg.PERF.fps,calls:__dbg.renderer.info.render.calls})"))
+        print('\n'.join(errs[:20]) or 'NO ERRORS')
+        await b.close()
+asyncio.run(main())

@@ -1,0 +1,16 @@
+<script>
+/* Android app shell: route Bangla speech to the phone's TTS, and let the shell handle fullscreen itself */
+(function(){ window.__APK=1;
+  try{ for(const k of ['fullscreenEnabled','webkitFullscreenEnabled']) Object.defineProperty(Document.prototype,k,{get:()=>false,configurable:true}); }catch(e){}
+  if(!window.AndroidTTS) return;
+  function U(t){ this.text=String(t==null?'':t); this.lang='bn-BD'; this.voice=null; this.pitch=1; this.rate=1; this.volume=1; }
+  var V=[{name:'ফোনের বাংলা ভয়েস',lang:'bn-BD',localService:true,default:true,voiceURI:'android-bn'}];
+  var S={ get speaking(){ try{ return AndroidTTS.isSpeaking(); }catch(e){ return false; } }, get pending(){ return false; }, paused:false, onvoiceschanged:null,
+    getVoices:function(){ try{ return AndroidTTS.hasBangla()?V:[]; }catch(e){ return []; } },
+    speak:function(u){ try{ AndroidTTS.speak(u.text,u.lang||'bn-BD',+u.pitch||1,+u.rate||1,u.volume==null?1:+u.volume); }catch(e){} },
+    cancel:function(){ try{ AndroidTTS.stop(); }catch(e){} }, pause:function(){ try{ AndroidTTS.stop(); }catch(e){} }, resume:function(){},
+    addEventListener:function(){}, removeEventListener:function(){} };
+  try{ Object.defineProperty(window,'speechSynthesis',{value:S,configurable:true,writable:true}); }catch(e){ window.speechSynthesis=S; }
+  window.SpeechSynthesisUtterance=U;
+})();
+</script>
