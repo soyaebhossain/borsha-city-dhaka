@@ -6,7 +6,10 @@
 > A GTA-style open-world browser game set in Greater Dhaka, built with three.js. Runs on mobile and desktop browsers, offline as a single HTML file, and as an Android APK.
 
 ## খেলো
-- **অনলাইন:** https://claude.ai/artifact/KU2QG4GQVf5466rt6BeGjC
+### ▶️ ফ্রি খেলো: **https://borsha-city-dhaka.vercel.app**
+লিংকে ক্লিক করলেই মোবাইল বা পিসির ব্রাউজারে চালু হয়, ডাউনলোড বা লগইন লাগে না। `main` ব্রাঞ্চে push করলে Vercel নিজে থেকেই সাইট আপডেট করে।
+
+- **অনলাইন (বিকল্প):** https://claude.ai/artifact/KU2QG4GQVf5466rt6BeGjC
 - **অফলাইন:** `dist/borsha-city-dhaka.html` নামিয়ে ব্রাউজারে খোলো (ইন্টারনেট লাগে না)
 - **অ্যান্ড্রয়েড:** `dist/borsha-city-dhaka.apk` (Android 7+, আপডেট করা Android System WebView লাগবে)
 - **লোকাল সার্ভার:** `cd game && python3 -m http.server 8765` → http://localhost:8765
